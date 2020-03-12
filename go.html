@@ -15,7 +15,7 @@
     <input v-model="message.color" placeholder="placeholder2……">
 </div>
 
-<button onclick="changeColor()" >changeColor</button>
+<!--<button onclick="refresh()" >refresh</button>-->
 <button onclick="show_model()" >show_model</button>
 <div id="myDiagramDiv"
      style="width:640px; height:480px; background-color: #DAE4E4;"></div>
@@ -24,15 +24,8 @@
     var vm  = new Vue({
         el: '#app',
         data: {
-            message: {key:'key1', color:'color1'},
+            message: {},
         }
-    });
-
-    vm.$watch('message.key', function(nval, oval) {
-        changeKey1("key",nval);
-    });
-    vm.$watch('message.color', function(nval, oval) {
-        changeKey1("color",nval);
     });
 
     var $ = go.GraphObject.make;
@@ -68,32 +61,33 @@
     ];
     diagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 
-
-    function show_model() {
-        console.log( diagram.model.nodeDataArray);
-        console.log( diagram.model.toJson());
+    function refresh() {
+        diagram.updateAllTargetBindings();
+        //diagram.updateAllRelationshipsFromData();
     }
 
-    var selected_data ;
-    var changeKey1 = function(key1,nval) {
-        diagram.model.commit(function(m) {
-            //var data = m.nodeDataArray[0];
-            m.set(selected_data, key1, nval);
-        }, "changed shared color");
-    };
+    function show_model() {
+        //console.log( diagram.model.nodeDataArray);
+        console.log( diagram.model.toJson());
+    }
 
     diagram.addDiagramListener("ObjectSingleClicked",
         function(e) {
             var part = e.subject.part;
             if (!(part instanceof go.Link)) {
                 console.log("Clicked on " + part.data.key);
-                vm.message.key=part.data.key;
-                vm.message.color=part.data.color;
-                selected_data = part.data;
+                vm.message = part.data;
             }
         });
 
-
+    diagram.addDiagramListener("LostFocus",
+        function(e) {
+            refresh();
+        });
+    diagram.addDiagramListener("GainedFocus",
+        function(e) {
+            refresh();
+        });
 </script>
 
 </body>

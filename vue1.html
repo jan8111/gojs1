@@ -19,14 +19,16 @@
 </div>
 
 <script>
+    var obj1= {aa:'aa1', bb:'bb1',cc:'cc1'};
     var vm  = new Vue({
         el: '#app',
         data: {
-            message: {aa:'aa1', bb:'bb1',cc:'cc1'},
+            message: obj1,
         }
     });
 
-    vm.message.aa="aa2";
+    //vm.message.aa="aa2";
+    //obj1.aa= "aa2";
 </script>
 
 
