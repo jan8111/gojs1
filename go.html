@@ -3,19 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="vue.js"></script>
     <script src="go-debug.js"></script>
     <script src="go-debug.d.ts"></script>
 </head>
 <body>
 
 
-<!--<button onclick="changeColor()" >changeColor</button>-->
+<div id="app">
+    <input v-model="message.key" placeholder="placeholder1……">
+    <input v-model="message.color" placeholder="placeholder2……">
+</div>
+
+<button onclick="changeColor()" >changeColor</button>
 <button onclick="show_model()" >show_model</button>
 <div id="myDiagramDiv"
      style="width:640px; height:480px; background-color: #DAE4E4;"></div>
 <script>
     "use strict";
-    var mydata ;
+    var vm  = new Vue({
+        el: '#app',
+        data: {
+            message: {key:'key1', color:'color1'},
+        }
+    });
+
+    vm.$watch('message.key', function(nval, oval) {
+        changeKey1("key",nval);
+    });
+    vm.$watch('message.color', function(nval, oval) {
+        changeKey1("color",nval);
+    });
+
     var $ = go.GraphObject.make;
 
     var diagram = new go.Diagram("myDiagramDiv");
@@ -30,8 +49,8 @@
     node.bind(new go.Binding("location", "loc"));
     var shape = new go.Shape();
     shape.figure = "RoundedRectangle";
-    shape.fill = brush  ;
-    // shape.bind(new go.Binding("fill","color"));
+    // shape.fill = brush  ;
+    shape.bind(new go.Binding("fill","color"));
     node.add(shape);
     var textblock = new go.TextBlock();
     // textblock.text = "Hello!";
@@ -41,8 +60,8 @@
     diagram.nodeTemplate=node;
 
     var nodeDataArray = [
-        { key: "Alpha", color: "lightblue" ,loc: new go.Point(0, 0)},  // note extra property for each node data: color
-        { key: "Beta", color: "lightgreen",loc: new go.Point(200, 250) }
+        { key: "Alpha", color: "lightblue"  },  // note extra property for each node data: color
+        { key: "Beta", color: "lightgreen"  }
     ];
     var linkDataArray = [
         { from: "Alpha", to: "Beta" }
@@ -50,24 +69,27 @@
     diagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 
 
-    // var changeColor = function() {  // define a function named "changeColor" callable by button.onclick
-    //     diagram.model.commit(function(m) {
-    //         var data = m.nodeDataArray[0];
-    //         m.set(data, "color", "red");
-    //     }, "changed shared color");
-    // };
-
     function show_model() {
-        //alert( diagram.model.toJson());
-        alert( mydata.key);
+        console.log( diagram.model.nodeDataArray);
+        console.log( diagram.model.toJson());
     }
+
+    var selected_data ;
+    var changeKey1 = function(key1,nval) {
+        diagram.model.commit(function(m) {
+            //var data = m.nodeDataArray[0];
+            m.set(selected_data, key1, nval);
+        }, "changed shared color");
+    };
 
     diagram.addDiagramListener("ObjectSingleClicked",
         function(e) {
             var part = e.subject.part;
             if (!(part instanceof go.Link)) {
                 console.log("Clicked on " + part.data.key);
-                mydata = part.data;
+                vm.message.key=part.data.key;
+                vm.message.color=part.data.color;
+                selected_data = part.data;
             }
         });
 
