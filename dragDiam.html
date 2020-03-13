@@ -8,7 +8,7 @@
 
     <script src="go-debug.js"></script>
     <script src="go-debug.d.ts"></script>
-    <script src="../extensions/Figures.js"></script>
+    <script src="Figures.js"></script>
     <script id="code">
         function init() {
             var $ = go.GraphObject.make;  // for conciseness in defining templates
@@ -22,11 +22,12 @@
                             $(go.Shape, "LineV", { stroke: "lightgray", strokeWidth: 0.5 }),
                             $(go.Shape, "LineV", { stroke: "gray", strokeWidth: 0.5, interval: 10 })
                         ),
+                        "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
                         "draggingTool.dragsLink": false,
                         "draggingTool.isGridSnapEnabled": true,
                         "linkingTool.isUnconnectedLinkValid": false,
                         "linkingTool.portGravity": 20,
-                        "relinkingTool.isUnconnectedLinkValid": true,
+                        "relinkingTool.isUnconnectedLinkValid": false,
                         "relinkingTool.portGravity": 20,
                         "relinkingTool.fromHandleArchetype":
                             $(go.Shape, "Diamond", { segmentIndex: 0, cursor: "pointer", desiredSize: new go.Size(8, 8), fill: "tomato", stroke: "darkred" }),
@@ -34,10 +35,7 @@
                             $(go.Shape, "Diamond", { segmentIndex: -1, cursor: "pointer", desiredSize: new go.Size(8, 8), fill: "darkred", stroke: "tomato" }),
                         "linkReshapingTool.handleArchetype":
                             $(go.Shape, "Diamond", { desiredSize: new go.Size(7, 7), fill: "lightblue", stroke: "deepskyblue" }),
-                        "rotatingTool.handleAngle": 270,
-                        "rotatingTool.handleDistance": 30,
-                        "rotatingTool.snapAngleMultiple": 15,
-                        "rotatingTool.snapAngleEpsilon": 15,
+
                         "undoManager.isEnabled": true
                     });
 
@@ -95,12 +93,7 @@
                     $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
                 );
 
-            var nodeRotateAdornmentTemplate =
-                $(go.Adornment,
-                    { locationSpot: go.Spot.Center, locationObjectName: "CIRCLE" },
-                    $(go.Shape, "Circle", { name: "CIRCLE", cursor: "pointer", desiredSize: new go.Size(7, 7), fill: "lightblue", stroke: "deepskyblue" }),
-                    $(go.Shape, { geometryString: "M3.5 7 L3.5 30", isGeometryPositioned: true, stroke: "deepskyblue", strokeWidth: 1.5, strokeDashArray: [4, 2] })
-                );
+
 
             myDiagram.nodeTemplate =
                 $(go.Node, "Spot",
@@ -108,8 +101,8 @@
                     new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
                     { selectable: true, selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
                     { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
-                    { rotatable: true, rotateAdornmentTemplate: nodeRotateAdornmentTemplate },
-                    new go.Binding("angle").makeTwoWay(),
+
+                    // new go.Binding("angle").makeTwoWay(),
                     // the main object is a Panel that surrounds a TextBlock with a Shape
                     $(go.Panel, "Auto",
                         { name: "PANEL" },
@@ -117,7 +110,7 @@
                         $(go.Shape, "Rectangle",  // default figure
                             {
                                 portId: "", // the default port: if no spot on link data, use closest side
-                                fromLinkable: true, toLinkable: true, cursor: "pointer",
+                                fromLinkable: true, toLinkable: true, cursor: "crosshair",
                                 fill: "white",  // default color
                                 strokeWidth: 2
                             },
@@ -129,7 +122,8 @@
                                 margin: 8,
                                 maxSize: new go.Size(160, NaN),
                                 wrap: go.TextBlock.WrapFit,
-                                editable: true
+                                editable: true,
+                                cursor:"grab"
                             },
                             new go.Binding("text").makeTwoWay())
                     ),
@@ -226,15 +220,15 @@
                                     { toArrow: "Standard", stroke: null })
                             ),
                         model: new go.GraphLinksModel([  // specify the contents of the Palette
-                            { text: "Start", figure: "Circle", fill: "#00AD5F" },
-                            { text: "Step" },
-                            { text: "DB", figure: "Database", fill: "lightgray" },
-                            { text: "???", figure: "Diamond", fill: "lightskyblue" },
-                            { text: "End", figure: "Circle", fill: "#CE0620" },
-                            { text: "Comment", figure: "RoundedRectangle", fill: "lightyellow" }
-                        ], [
-                            // the Palette also has a disconnected Link, which the user can drag-and-drop
-                            { points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) }
+                            { text: "开始", figure: "Circle", fill: "#00AD5F" },
+                            { text: "变量", figure: "File", fill: "yellow" },
+                            { text: "播报", figure: "RoundedRectangle", fill: "lightyellow" },
+                            { text: "判断", figure: "Diamond", fill: "lightskyblue" },
+                            { text: "交互", figure: "Parallelogram", fill: "#88ad2f" },
+                            { text: "外部流程", figure: "Hexagon", fill: "#5176ad" },
+                            { text: "外呼", figure: "MessageFromUser", fill: "lightblue" },
+                            { text: "交易", figure: "Database", fill: "lightgray" },
+                            { text: "结束", figure: "Circle", fill: "#CE0620" },
                         ])
                     });
         }
@@ -274,21 +268,26 @@
             <button onclick="load()">Load</button>
             Diagram Model saved in JSON format:
         </div>
-        <textarea id="mySavedModel" style="width:100%;height:300px">
-{ "class": "GraphLinksModel",
+        <textarea id="mySavedModel" style="width:100%;height:300px">{ "class": "GraphLinksModel",
   "linkFromPortIdProperty": "fromPort",
   "linkToPortIdProperty": "toPort",
-  "modelData": {"position":"-865.5 -310"},
+  "modelData": {"position":"-916.3168049059666 -355.24839832020075"},
   "nodeDataArray": [
-{"text":"Start", "figure":"Circle", "fill":"#00AD5F", "key":-1, "loc":"-650 -190"},
-{"text":"Step", "key":-2, "loc":"-530 -60"},
-{"text":"???", "figure":"Diamond", "fill":"lightskyblue", "key":-4, "loc":"-600 50"}
+{"text":"开始", "figure":"Circle", "fill":"#00AD5F", "key":-1, "loc":"-750 -270"},
+{"text":"播报", "key":-2, "loc":"-720 -180"},
+{"text":"aaaa", "figure":"Diamond", "fill":"lightskyblue", "key":-4, "loc":"-810 -40"},
+{"text":"Step", "key":-7, "loc":"-800 -130"},
+{"text":"End", "figure":"Circle", "fill":"#CE0620", "key":-5, "loc":"-580 50"},
+{"text":"Comment", "figure":"RoundedRectangle", "fill":"lightyellow", "key":-6, "loc":"-820 50"}
  ],
   "linkDataArray": [
-{"from":-1, "to":-2, "fromPort":"B", "toPort":"L", "points":[-650,-153.0987529311069,-650,-143.0987529311069,-794,-143.0987529311069,-794,-59.999999999999986,-564.884033203125,-59.999999999999986,-554.884033203125,-59.999999999999986]},
-{"from":-2, "to":-4, "fromPort":"B", "toPort":"T", "points":[-530,-43.06227569580077,-530,-33.06227569580077,-530,-27,-600,-27,-600,7.124551391601564,-600,17.124551391601564]}
- ]}
-    </textarea>
+{"from":-2, "to":-7, "fromPort":"B", "toPort":"T" },
+{"from":-1, "to":-2, "fromPort":"", "toPort":"T" },
+{"from":-7, "to":-4, "fromPort":"", "toPort":"T"},
+{"from":-4, "to":-6, "fromPort":"B", "toPort":"T"},
+{"from":-4, "to":-5, "fromPort":"", "toPort":"T"},
+{"from":-6, "to":-5, "fromPort":"", "toPort":"L"}
+ ]}</textarea>
     </div>
 </div>
 </body>
