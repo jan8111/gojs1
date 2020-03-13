@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Draggable Link</title>
+    <title>ibot-ui adv</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Copyright 1998-2020 by Northwoods Software Corporation. -->
 
     <script src="go-debug.js"></script>
     <script src="go-debug.d.ts"></script>
@@ -111,6 +110,7 @@
                             {
                                 portId: "", // the default port: if no spot on link data, use closest side
                                 fromLinkable: true, toLinkable: true, cursor: "crosshair",
+                                fromLinkableDuplicates: false, toLinkableDuplicates: false,
                                 fill: "white",  // default color
                                 strokeWidth: 2
                             },
@@ -128,10 +128,10 @@
                             new go.Binding("text").makeTwoWay())
                     ),
                     // four small named ports, one on each side:
-                    makePort("T", go.Spot.Top, false, true),
-                    makePort("L", go.Spot.Left, true, true),
-                    makePort("R", go.Spot.Right, true, true),
-                    makePort("B", go.Spot.Bottom, true, false),
+                    // makePort("T", go.Spot.Top, false, true),
+                    // makePort("L", go.Spot.Left, true, true),
+                    // makePort("R", go.Spot.Right, true, true),
+                    // makePort("B", go.Spot.Bottom, true, false),
                     { // handle mouse enter/leave events to show/hide the ports
                         mouseEnter: function(e, node) { showSmallPorts(node, true); },
                         mouseLeave: function(e, node) { showSmallPorts(node, false); }
@@ -163,6 +163,7 @@
                         corner: 5,
                         toShortLength: 4
                     },
+                    { fromSpot: go.Spot.Bottom, toSpot: go.Spot.Top },
                     new go.Binding("points").makeTwoWay(),
                     $(go.Shape,  // the link path shape
                         { isPanelMain: true, strokeWidth: 2 }),
@@ -171,7 +172,7 @@
                     $(go.Panel, "Auto",
                         new go.Binding("visible", "isSelected").ofObject(),
                         $(go.Shape, "RoundedRectangle",  // the link shape
-                            { fill: "#F8F8F8", stroke: null }),
+                            { fill: "#a6f87e", stroke: null }),
                         $(go.TextBlock,
                             {
                                 textAlign: "center",
@@ -188,47 +189,28 @@
             load();  // load an initial diagram from some JSON text
 
             // initialize the Palette that is on the left side of the page
+            var greenBrush = $(go.Brush, "Linear", { 0: "rgb(200,255,200)", .67: "rgb(15,160,15)" });
+            var redBrush = $(go.Brush, "Linear", { 0: "rgb(255,240,240)", .67: "rgb(255,0,0)" });
+            var blueBrush = $(go.Brush, "Linear", { 0: "rgb(250,250,255)", .67: "rgb(90,125,200)" });
+            var yellowBrush = $(go.Brush, "Linear", { 0: "rgb(255,255,240)", .67: "rgb(249,248,68)" });
+            var pinkBrush = $(go.Brush, "Linear", { 0: "rgb(255,250,250)", .67: "rgb(255,185,204)" });
+            var lightBrush = $(go.Brush, "Linear", { 0: "rgb(240,240,250)", .67: "rgb(150,200,250)" });
+
             myPalette =
                 $(go.Palette, "myPaletteDiv",  // must name or refer to the DIV HTML element
                     {
                         maxSelectionCount: 1,
                         nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
-                        linkTemplate: // simplify the link template, just in this Palette
-                            $(go.Link,
-                                { // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
-                                    // to line up the Link in the same manner we have to pretend the Link has the same location spot
-                                    locationSpot: go.Spot.Center,
-                                    selectionAdornmentTemplate:
-                                        $(go.Adornment, "Link",
-                                            { locationSpot: go.Spot.Center },
-                                            $(go.Shape,
-                                                { isPanelMain: true, fill: null, stroke: "deepskyblue", strokeWidth: 0 }),
-                                            $(go.Shape,  // the arrowhead
-                                                { toArrow: "Standard", stroke: null })
-                                        )
-                                },
-                                {
-                                    routing: go.Link.AvoidsNodes,
-                                    curve: go.Link.JumpOver,
-                                    corner: 5,
-                                    toShortLength: 4
-                                },
-                                new go.Binding("points"),
-                                $(go.Shape,  // the link path shape
-                                    { isPanelMain: true, strokeWidth: 2 }),
-                                $(go.Shape,  // the arrowhead
-                                    { toArrow: "Standard", stroke: null })
-                            ),
                         model: new go.GraphLinksModel([  // specify the contents of the Palette
-                            { text: "开始", figure: "Circle", fill: "#00AD5F" },
-                            { text: "变量", figure: "File", fill: "yellow" },
+                            { text: "开始", figure: "Circle", fill: greenBrush },
+                            { text: "变量", figure: "File", fill: yellowBrush },
                             { text: "播报", figure: "RoundedRectangle", fill: "lightyellow" },
-                            { text: "判断", figure: "Diamond", fill: "lightskyblue" },
+                            { text: "判断", figure: "Diamond", fill: blueBrush },
                             { text: "交互", figure: "Parallelogram", fill: "#88ad2f" },
-                            { text: "外部流程", figure: "Hexagon", fill: "#5176ad" },
-                            { text: "外呼", figure: "MessageFromUser", fill: "lightblue" },
+                            { text: "外部流程", figure: "Hexagon", fill: pinkBrush },
+                            { text: "外呼", figure: "MessageFromUser", fill: lightBrush },
                             { text: "交易", figure: "Database", fill: "lightgray" },
-                            { text: "结束", figure: "Circle", fill: "#CE0620" },
+                            { text: "结束", figure: "Circle", fill: redBrush },
                         ])
                     });
         }
@@ -271,22 +253,23 @@
         <textarea id="mySavedModel" style="width:100%;height:300px">{ "class": "GraphLinksModel",
   "linkFromPortIdProperty": "fromPort",
   "linkToPortIdProperty": "toPort",
-  "modelData": {"position":"-916.3168049059666 -355.24839832020075"},
+  "modelData": {"position":"-586 -194.93602965598882"},
   "nodeDataArray": [
-{"text":"开始", "figure":"Circle", "fill":"#00AD5F", "key":-1, "loc":"-750 -270"},
-{"text":"播报", "key":-2, "loc":"-720 -180"},
-{"text":"aaaa", "figure":"Diamond", "fill":"lightskyblue", "key":-4, "loc":"-810 -40"},
-{"text":"Step", "key":-7, "loc":"-800 -130"},
-{"text":"End", "figure":"Circle", "fill":"#CE0620", "key":-5, "loc":"-580 50"},
-{"text":"Comment", "figure":"RoundedRectangle", "fill":"lightyellow", "key":-6, "loc":"-820 50"}
+{"text":"开始", "figure":"Circle", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(200,255,200)", "0.67":"rgb(15,160,15)"}}, "key":-1, "loc":"-380 -70"},
+{"text":"判断", "figure":"Diamond", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(250,250,255)", "0.67":"rgb(90,125,200)"}}, "key":-4, "loc":"-250 40"},
+{"text":"变量", "figure":"File", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,255,240)", "0.67":"rgb(249,248,68)"}}, "key":-2, "loc":"-350 120"},
+{"text":"外部流程", "figure":"Hexagon", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,250,250)", "0.67":"rgb(255,185,204)"}}, "key":-6, "loc":"-480 110"},
+{"text":"结束", "figure":"Circle", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,240,240)", "0.67":"rgb(255,0,0)"}}, "key":-9, "loc":"-420 330"},
+{"text":"播报", "figure":"RoundedRectangle", "fill":"lightyellow", "key":-3, "loc":"-180 220"}
  ],
   "linkDataArray": [
-{"from":-2, "to":-7, "fromPort":"B", "toPort":"T" },
-{"from":-1, "to":-2, "fromPort":"", "toPort":"T" },
-{"from":-7, "to":-4, "fromPort":"", "toPort":"T"},
-{"from":-4, "to":-6, "fromPort":"B", "toPort":"T"},
-{"from":-4, "to":-5, "fromPort":"", "toPort":"T"},
-{"from":-6, "to":-5, "fromPort":"", "toPort":"L"}
+{"from":-1, "to":-6, "fromPort":"", "toPort":"", "points":[-380,-36.06397034401117,-380,-26.063970344011167,-380,20.530290523795195,-480,20.530290523795195,-480,67.12455139160156,-480,77.12455139160156]},
+{"from":-1, "to":-4, "fromPort":"", "toPort":"", "points":[-380,-36.06397034401117,-380,-26.063970344011167,-380,-14.469709476204805,-250,-14.469709476204805,-250,-2.875448608398443,-250,7.124551391601557]},
+{"from":-4, "to":-2, "fromPort":"", "toPort":"", "points":[-250,72.87544860839843,-250,82.87544860839843,-250,85.31257476806638,-350,85.31257476806638,-350,87.74970092773435,-350,97.74970092773435]},
+{"from":-4, "to":-3, "fromPort":"", "toPort":"", "points":[-250,72.87544860839843,-250,82.87544860839843,-250,136.58815027752263,-180,136.58815027752263,-180,190.30085194664682,-180,200.30085194664682]},
+{"from":-3, "to":-9, "fromPort":"", "toPort":"", "points":[-180,239.69914805335318,-180,249.69914805335318,-180,252,-420,252,-420,286.0639703440112,-420,296.0639703440112]},
+{"from":-2, "to":-9, "fromPort":"", "toPort":"", "points":[-350,142.2502990722656,-350,152.2502990722656,-350,219.1571347081384,-420,219.1571347081384,-420,286.0639703440112,-420,296.0639703440112]},
+{"from":-6, "to":-9, "fromPort":"", "toPort":"", "points":[-480,142.87544860839841,-480,152.87544860839841,-480,219.4697094762048,-420,219.4697094762048,-420,286.0639703440112,-420,296.0639703440112]}
  ]}</textarea>
     </div>
 </div>
