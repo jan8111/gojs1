@@ -110,6 +110,7 @@
                             {
                                 portId: "", // the default port: if no spot on link data, use closest side
                                 fromLinkable: true, toLinkable: true, cursor: "crosshair",
+                                fromSpot: go.Spot.Bottom, toSpot: go.Spot.Top ,
                                 fromLinkableDuplicates: false, toLinkableDuplicates: false,
                                 fill: "white",  // default color
                                 strokeWidth: 2
@@ -163,7 +164,7 @@
                         corner: 5,
                         toShortLength: 4
                     },
-                    { fromSpot: go.Spot.Bottom, toSpot: go.Spot.Top },
+                    // { fromSpot: go.Spot.Bottom, toSpot: go.Spot.Top },
                     new go.Binding("points").makeTwoWay(),
                     $(go.Shape,  // the link path shape
                         { isPanelMain: true, strokeWidth: 2 }),
@@ -202,16 +203,24 @@
                         maxSelectionCount: 1,
                         nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
                         model: new go.GraphLinksModel([  // specify the contents of the Palette
-                            { text: "开始", figure: "Circle", fill: greenBrush },
-                            { text: "变量", figure: "File", fill: yellowBrush },
+                            { text: "开始", figure: "Circle", fill: "#00AD5F" },
+                            { text: "变量", figure: "File", fill: "yellow" },
                             { text: "播报", figure: "RoundedRectangle", fill: "lightyellow" },
-                            { text: "判断", figure: "Diamond", fill: blueBrush },
+                            { text: "判断", figure: "Diamond", fill: "lightskyblue" },
                             { text: "交互", figure: "Parallelogram", fill: "#88ad2f" },
-                            { text: "外部流程", figure: "Hexagon", fill: pinkBrush },
-                            { text: "外呼", figure: "MessageFromUser", fill: lightBrush },
+                            { text: "外部流程", figure: "Hexagon", fill: "#5176ad" },
+                            { text: "外呼", figure: "MessageFromUser", fill: "lightblue" },
                             { text: "交易", figure: "Database", fill: "lightgray" },
-                            { text: "结束", figure: "Circle", fill: redBrush },
+                            { text: "结束", figure: "Circle", fill: "#CE0620" },
                         ])
+                    });
+
+            var myOverview =
+                $(go.Overview, 'myOverviewDiv',  // the HTML DIV element for the Overview
+                    {
+                        observed: myDiagram,
+                        contentAlignment: go.Spot.Center
+
                     });
         }
 
@@ -243,34 +252,64 @@
         <div id="myPaletteDiv" style="width: 105px; margin-right: 2px; background-color: whitesmoke; border: solid 1px black"></div>
         <div id="myDiagramDiv" style="flex-grow: 1; height: 620px; border: solid 1px black"></div>
     </div>
-
     <div>
         <div>
             <button id="SaveButton" onclick="save()">Save</button>
             <button onclick="load()">Load</button>
-            Diagram Model saved in JSON format:
         </div>
-        <textarea id="mySavedModel" style="width:100%;height:300px">{ "class": "GraphLinksModel",
-  "linkFromPortIdProperty": "fromPort",
-  "linkToPortIdProperty": "toPort",
-  "modelData": {"position":"-586 -194.93602965598882"},
-  "nodeDataArray": [
-{"text":"开始", "figure":"Circle", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(200,255,200)", "0.67":"rgb(15,160,15)"}}, "key":-1, "loc":"-380 -70"},
-{"text":"判断", "figure":"Diamond", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(250,250,255)", "0.67":"rgb(90,125,200)"}}, "key":-4, "loc":"-250 40"},
-{"text":"变量", "figure":"File", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,255,240)", "0.67":"rgb(249,248,68)"}}, "key":-2, "loc":"-350 120"},
-{"text":"外部流程", "figure":"Hexagon", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,250,250)", "0.67":"rgb(255,185,204)"}}, "key":-6, "loc":"-480 110"},
-{"text":"结束", "figure":"Circle", "fill":{"class":"go.Brush", "type":"Linear", "start":{"class":"go.Spot", "x":0.5, "y":0, "offsetX":0, "offsetY":0}, "end":{"class":"go.Spot", "x":0.5, "y":1, "offsetX":0, "offsetY":0}, "colorStops":{"0":"rgb(255,240,240)", "0.67":"rgb(255,0,0)"}}, "key":-9, "loc":"-420 330"},
-{"text":"播报", "figure":"RoundedRectangle", "fill":"lightyellow", "key":-3, "loc":"-180 220"}
- ],
-  "linkDataArray": [
-{"from":-1, "to":-6, "fromPort":"", "toPort":"", "points":[-380,-36.06397034401117,-380,-26.063970344011167,-380,20.530290523795195,-480,20.530290523795195,-480,67.12455139160156,-480,77.12455139160156]},
-{"from":-1, "to":-4, "fromPort":"", "toPort":"", "points":[-380,-36.06397034401117,-380,-26.063970344011167,-380,-14.469709476204805,-250,-14.469709476204805,-250,-2.875448608398443,-250,7.124551391601557]},
-{"from":-4, "to":-2, "fromPort":"", "toPort":"", "points":[-250,72.87544860839843,-250,82.87544860839843,-250,85.31257476806638,-350,85.31257476806638,-350,87.74970092773435,-350,97.74970092773435]},
-{"from":-4, "to":-3, "fromPort":"", "toPort":"", "points":[-250,72.87544860839843,-250,82.87544860839843,-250,136.58815027752263,-180,136.58815027752263,-180,190.30085194664682,-180,200.30085194664682]},
-{"from":-3, "to":-9, "fromPort":"", "toPort":"", "points":[-180,239.69914805335318,-180,249.69914805335318,-180,252,-420,252,-420,286.0639703440112,-420,296.0639703440112]},
-{"from":-2, "to":-9, "fromPort":"", "toPort":"", "points":[-350,142.2502990722656,-350,152.2502990722656,-350,219.1571347081384,-420,219.1571347081384,-420,286.0639703440112,-420,296.0639703440112]},
-{"from":-6, "to":-9, "fromPort":"", "toPort":"", "points":[-480,142.87544860839841,-480,152.87544860839841,-480,219.4697094762048,-420,219.4697094762048,-420,286.0639703440112,-420,296.0639703440112]}
- ]}</textarea>
+        <div style="width: 100%; display: flex; justify-content: space-between">
+            <div id="myOverviewDiv" style="border: solid 1px black; width: 250px; height: 200px"></div>
+            <textarea id="mySavedModel" style="width:100%;height:200px">{ "class": "GraphLinksModel",
+      "linkFromPortIdProperty": "fromPort",
+      "linkToPortIdProperty": "toPort",
+      "modelData": {"position":"-1042.7605386340852 310.58777986782076"},
+      "nodeDataArray": [
+    {"text":"开始", "figure":"Circle", "fill":"#00AD5F", "key":-1, "loc":"-270 -20"},
+    {"text":"结束", "figure":"Circle", "fill":"#CE0620", "key":-9, "loc":"-620 210"},
+    {"text":"交互", "figure":"Parallelogram", "fill":"#88ad2f", "key":-5, "loc":"-500 220"},
+    {"text":"外部流程", "figure":"Hexagon", "fill":"#5176ad", "key":-6, "loc":"-560 80"},
+    {"text":"外部流程", "figure":"Hexagon", "fill":"#5176ad", "key":-7, "loc":"-390 220"},
+    {"text":"判断", "figure":"Diamond", "fill":"lightskyblue", "key":-4, "loc":"-730 220"},
+    {"text":"判断", "figure":"Diamond", "fill":"lightskyblue", "key":-8, "loc":"-770 340"},
+    {"text":"交互", "figure":"Parallelogram", "fill":"#88ad2f", "key":-10, "loc":"-610 350"},
+    {"text":"判断", "figure":"Diamond", "fill":"lightskyblue", "key":-11, "loc":"-470 360"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-12, "loc":"-630 460"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-13, "loc":"-730 530"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-14, "loc":"-640 590"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-15, "loc":"-650 730"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-16, "loc":"-650 860"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-17, "loc":"-670 970"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-18, "loc":"-660 1140"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-19, "loc":"-640 1300"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-20, "loc":"-620 1500"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-21, "loc":"-790 720"},
+    {"text":"交易", "figure":"Database", "fill":"lightgray", "key":-22, "loc":"-490 730"},
+    {"text":"外呼", "figure":"MessageFromUser", "fill":"lightblue", "key":-23, "loc":"-370 720"},
+    {"text":"外部流程", "figure":"Hexagon", "fill":"#5176ad", "key":-24, "loc":"-230 710"}
+     ],
+      "linkDataArray": [
+    {"from":-1, "to":-6, "fromPort":"", "toPort":"", "points":[-270,13.936029655988825,-270,23.936029655988825,-270,30.53029052379519,-560,30.53029052379519,-560,37.12455139160156,-560,47.12455139160156]},
+    {"from":-6, "to":-4, "fromPort":"", "toPort":"", "points":[-560,112.87544860839843,-560,122.87544860839843,-560,150,-730,150,-730,177.12455139160156,-730,187.12455139160156]},
+    {"from":-6, "to":-9, "fromPort":"", "toPort":"", "points":[-560,112.87544860839843,-560,122.87544860839843,-560,144.4697094762048,-620,144.4697094762048,-620,166.06397034401118,-620,176.06397034401118]},
+    {"from":-6, "to":-5, "fromPort":"", "toPort":"", "points":[-560,112.87544860839843,-560,122.87544860839843,-560,157.9688621520996,-500,157.9688621520996,-500,193.0622756958008,-500,203.0622756958008]},
+    {"from":-6, "to":-7, "fromPort":"", "toPort":"", "points":[-560,112.87544860839843,-560,122.87544860839843,-560,150,-390,150,-390,177.12455139160156,-390,187.12455139160156]},
+    {"from":-9, "to":-10, "fromPort":"", "toPort":"", "points":[-620,243.93602965598882,-620,253.93602965598882,-620,288.49915267589483,-610,288.49915267589483,-610,323.0622756958008,-610,333.0622756958008]},
+    {"from":-9, "to":-11, "fromPort":"", "toPort":"", "points":[-620,243.93602965598882,-620,253.93602965598882,-620,285.5302905237952,-470,285.5302905237952,-470,317.1245513916016,-470,327.1245513916016]},
+    {"from":-5, "to":-11, "fromPort":"", "toPort":"", "points":[-500,236.93772430419924,-500,246.93772430419924,-500,282.0311378479004,-470,282.0311378479004,-470,317.1245513916016,-470,327.1245513916016]},
+    {"from":-7, "to":-11, "fromPort":"", "toPort":"", "points":[-390,252.87544860839841,-390,262.8754486083984,-390,290,-470,290,-470,317.1245513916016,-470,327.1245513916016]},
+    {"from":-4, "to":-8, "fromPort":"", "toPort":"", "points":[-730,252.87544860839841,-730,262.8754486083984,-730,280,-770,280,-770,297.1245513916016,-770,307.1245513916016]},
+    {"from":-8, "to":-12, "fromPort":"", "toPort":"", "points":[-770,372.8754486083985,-770,382.8754486083985,-770,400,-630,400,-630,417.1245513916016,-630,427.1245513916016]},
+    {"from":-10, "to":-12, "fromPort":"", "toPort":"", "points":[-610,366.9377243041992,-610,376.9377243041992,-610,397.03113784790037,-630,397.03113784790037,-630,417.1245513916016,-630,427.1245513916016]},
+    {"from":-11, "to":-12, "fromPort":"", "toPort":"", "points":[-470,392.8754486083985,-470,402.8754486083985,-470,410,-630,410,-630,417.1245513916016,-630,427.1245513916016]},
+    {"from":-12, "to":-13, "fromPort":"", "toPort":"", "points":[-630,492.8754486083985,-630,502.8754486083985,-680,502.8754486083985,-680,487.1245513916016,-730,487.1245513916016,-730,497.1245513916016]},
+    {"from":-13, "to":-14, "fromPort":"", "toPort":"", "points":[-730,562.8754486083984,-730,572.8754486083984,-685,572.8754486083984,-685,547.1245513916016,-640,547.1245513916016,-640,557.1245513916016]},
+    {"from":-14, "to":-15, "fromPort":"", "toPort":"", "points":[-640,622.8754486083984,-640,632.8754486083984,-640,660,-650,660,-650,687.1245513916016,-650,697.1245513916016]},
+    {"from":-14, "to":-21, "fromPort":"", "toPort":"", "points":[-640,622.8754486083984,-640,632.8754486083984,-640,655,-790,655,-790,677.1245513916016,-790,687.1245513916016]},
+    {"from":-14, "to":-22, "fromPort":"", "toPort":"", "points":[-640,622.8754486083984,-640,632.8754486083984,-640,660,-490,660,-490,687.1245513916016,-490,697.1245513916016]},
+    {"from":-14, "to":-23, "fromPort":"", "toPort":"", "points":[-640,622.8754486083984,-640,632.8754486083984,-640,662.9688621520995,-370,662.9688621520995,-370,693.0622756958007,-370,703.0622756958007]},
+    {"from":-14, "to":-24, "fromPort":"", "toPort":"", "points":[-640,622.8754486083984,-640,632.8754486083984,-640,650,-230,650,-230,667.1245513916016,-230,677.1245513916016]}
+     ]}</textarea>
+        </div>
     </div>
 </div>
 </body>
